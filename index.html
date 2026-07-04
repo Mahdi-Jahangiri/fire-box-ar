@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Fire Box - نمایش واقعیت افزوده</title>
+    
+    <!-- لود کردن مدل‌ویور -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+    
+    <!-- فونت B Nazanin از CDN -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    
+    <style>
+        /* فونت‌ها */
+        @font-face {
+            font-family: 'B Nazanin';
+            src: url('https://cdn.jsdelivr.net/gh/font-store/font-b-nazanin@master/BNazanin.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'B Nazanin', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* صفحه لودینگ حرفه‌ای */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        
+        .loading-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .loader {
+            width: 80px;
+            height: 80px;
+            position: relative;
+        }
+        
+        .loader::before,
+        .loader::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            animation: pulsOut 1.8s ease-in-out infinite;
+            border: 3px solid #fff;
+        }
+        
+        .loader::before {
+            width: 100%;
+            height: 100%;
+            animation-delay: -0.9s;
+        }
+        
+        .loader::after {
+            width: 75%;
+            height: 75%;
+            top: 12.5%;
+            left: 12.5%;
+        }
+        
+        @keyframes pulsOut {
+            0%, 100% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .loading-text {
+            color: #fff;
+            font-size: 24px;
+            margin-top: 30px;
+            font-family: 'B Nazanin', sans-serif;
+            animation: fadeInOut 2s ease-in-out infinite;
+        }
+        
+        .loading-subtext {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+            margin-top: 10px;
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            letter-spacing: 2px;
+        }
+        
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
+        /* هدر */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-family: 'B Nazanin', sans-serif;
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            font-size: 14px;
+            color: #666;
+            letter-spacing: 1px;
+        }
+        
+        /* کانتینر مدل */
+        .model-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        model-viewer {
+            width: 100%;
+            height: 600px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            --poster-color: transparent;
+        }
+        
+        /* دکمه AR سفارشی */
+        .ar-button {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-family: 'B Nazanin', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .ar-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+        
+        .ar-button::before {
+            content: '📱';
+            font-size: 24px;
+        }
+        
+        /* اطلاعات */
+        .info-section {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .info-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .info-card h2 {
+            font-family: 'B Nazanin', sans-serif;
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .info-card p {
+            font-family: 'B Nazanin', sans-serif;
+            font-size: 18px;
+            color: #666;
+            line-height: 1.8;
+        }
+        
+        .feature-list {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .feature-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .feature-icon {
+            font-size: 40px;
+        }
+        
+        .feature-text {
+            font-family: 'B Nazanin', sans-serif;
+            font-size: 16px;
+            color: #333;
+        }
+        
+        /* فوتر */
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: rgba(255, 255, 255, 0.8);
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            font-size: 14px;
+        }
+        
+        /* ریسپانسیو */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            model-viewer {
+                height: 400px;
+            }
+            
+            .info-card h2 {
+                font-size: 22px;
+            }
+            
+            .info-card p {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- صفحه لودینگ -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loader"></div>
+        <div class="loading-text">در حال بارگذاری مدل سه‌بعدی...</div>
+        <div class="loading-subtext">LOADING 3D MODEL</div>
+    </div>
+    
+    <!-- هدر -->
+    <div class="header">
+        <h1>🔥 Fire Box</h1>
+        <p>AUGMENTED REALITY EXPERIENCE</p>
+    </div>
+    
+    <!-- کانتینر مدل -->
+    <div class="model-container">
+        <model-viewer 
+            id="modelViewer"
+            src="fire_box.glb" 
+            alt="مدل سه‌بعدی Fire Box"
+            ar 
+            ar-modes="webxr scene-viewer quick-look"
+            ar-placement="wall"
+            camera-controls 
+            auto-rotate
+            auto-rotate-delay="2000"
+            rotation-per-second="30deg"
+            shadow-intensity="1.5"
+            shadow-softness="0.8"
+            exposure="1.2"
+            tone-mapping="neutral"
+            camera-orbit="45deg 75deg 2.5m"
+            min-camera-orbit="auto auto auto"
+            max-camera-orbit="auto auto auto"
+            interaction-prompt="auto"
+            interaction-prompt-threshold="3000"
+            ar-scale="auto"
+            style="--poster-color: transparent;">
+            
+            <!-- دکمه AR سفارشی -->
+            <button slot="ar-button" class="ar-button">
+                مشاهده در واقعیت افزوده
+            </button>
+            
+            <!-- پیام تعامل -->
+            <div slot="interaction-prompt" style="position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 10px 20px; border-radius: 20px; font-family: 'B Nazanin', sans-serif;">
+                برای چرخاندن، بکشید
+            </div>
+        </model-viewer>
+    </div>
+    
+    <!-- بخش اطلاعات -->
+    <div class="info-section">
+        <div class="info-card">
+            <h2>✨ تجربه تعاملی سه‌بعدی</h2>
+            <p>
+                این مدل سه‌بعدی را می‌توانید در محیط واقعی خود مشاهده کنید.
+                <br>
+                کافیست روی دکمه "مشاهده در واقعیت افزوده" کلیک کنید.
+            </p>
+            
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="feature-icon">🔄</div>
+                    <div class="feature-text">چرخش ۳۶۰ درجه</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📱</div>
+                    <div class="feature-text">واقعیت افزوده</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🎨</div>
+                    <div class="feature-text">کیفیت بالا</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- فوتر -->
+    <div class="footer">
+        <p>Designed with ❤️ by Mahdi-Jahngiri</p>
+        <p style="margin-top: 5px;">Powered by WebAR Technology</p>
+    </div>
+    
+    <script>
+        // مخفی کردن صفحه لودینگ بعد از لود شدن مدل
+        const modelViewer = document.getElementById('modelViewer');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        
+        modelViewer.addEventListener('load', () => {
+            setTimeout(() => {
+                loadingOverlay.classList.add('hidden');
+            }, 500);
+        });
+        
+        // اگر مدل قبلاً لود شده
+        if (modelViewer.loaded) {
+            setTimeout(() => {
+                loadingOverlay.classList.add('hidden');
+            }, 500);
+        }
+        
+        // fallback: بعد از ۵ ثانیه لودینگ را مخفی کن
+        setTimeout(() => {
+            loadingOverlay.classList.add('hidden');
+        }, 5000);
+    </script>
+    
+</body>
+</html>
