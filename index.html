@@ -3,52 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Fire Box - نمایش واقعیت افزوده</title>
+    <title>Fire Box - تجربه واقعیت افزوده | Mahdi Jahangiri</title>
     
     <!-- لود کردن مدل‌ویور -->
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
     
-    <!-- فونت B Nazanin از CDN -->
+    <!-- فونت Vazirmatn (جایگزین حرفه‌ای B Nazanin) -->
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
     
+    <!-- فونت Inter برای انگلیسی (مدرن و جایگزین SF Pro) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        /* فونت‌ها */
-        @font-face {
-            font-family: 'B Nazanin';
-            src: url('https://cdn.jsdelivr.net/gh/font-store/font-b-nazanin@master/BNazanin.woff2') format('woff2');
-            font-weight: normal;
-            font-style: normal;
-            font-display: swap;
+        /* ===== فونت‌ها ===== */
+        :root {
+            --font-fa: 'Vazirmatn', 'B Nazanin', Tahoma, sans-serif;
+            --font-en: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
         }
         
+        /* ===== ریست و تنظیمات پایه ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
         
+        html {
+            scroll-behavior: smooth;
+        }
+        
         body {
-            font-family: 'B Nazanin', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            font-family: var(--font-fa);
+            background: #0a0a0a;
+            color: #fff;
             overflow-x: hidden;
             position: relative;
         }
         
-        /* صفحه لودینگ حرفه‌ای */
+        /* ===== پس‌زمینه متحرک با گرادیانت ===== */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, 
+                #667eea 0%, 
+                #764ba2 25%, 
+                #f093fb 50%, 
+                #4facfe 75%, 
+                #667eea 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            z-index: -2;
+            opacity: 0.15;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* ===== ذرات متحرک (Particles) ===== */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+        
+        /* ===== صفحه لودینگ حرفه‌ای ===== */
         .loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 9999;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
         }
         
         .loading-overlay.hidden {
@@ -56,269 +125,505 @@
             visibility: hidden;
         }
         
-        .loader {
-            width: 80px;
-            height: 80px;
+        /* انیمیشن لودر مدرن */
+        .loader-modern {
+            width: 100px;
+            height: 100px;
             position: relative;
         }
         
-        .loader::before,
-        .loader::after {
+        .loader-modern::before,
+        .loader-modern::after {
             content: '';
             position: absolute;
             border-radius: 50%;
-            animation: pulsOut 1.8s ease-in-out infinite;
-            border: 3px solid #fff;
+            border: 4px solid transparent;
+            animation: loaderRotate 2s linear infinite;
         }
         
-        .loader::before {
+        .loader-modern::before {
             width: 100%;
             height: 100%;
-            animation-delay: -0.9s;
+            border-top-color: #667eea;
+            border-right-color: #764ba2;
         }
         
-        .loader::after {
-            width: 75%;
-            height: 75%;
-            top: 12.5%;
-            left: 12.5%;
+        .loader-modern::after {
+            width: 70%;
+            height: 70%;
+            top: 15%;
+            left: 15%;
+            border-bottom-color: #f093fb;
+            border-left-color: #4facfe;
+            animation-direction: reverse;
         }
         
-        @keyframes pulsOut {
-            0%, 100% {
-                transform: scale(0.5);
-                opacity: 0;
-            }
-            50% {
-                transform: scale(1);
-                opacity: 1;
-            }
+        @keyframes loaderRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         .loading-text {
             color: #fff;
-            font-size: 24px;
-            margin-top: 30px;
-            font-family: 'B Nazanin', sans-serif;
-            animation: fadeInOut 2s ease-in-out infinite;
+            font-size: 28px;
+            font-weight: 600;
+            margin-top: 40px;
+            font-family: var(--font-fa);
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: textGradient 3s ease infinite;
+        }
+        
+        @keyframes textGradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
         
         .loading-subtext {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 16px;
-            margin-top: 10px;
-            font-family: 'SF Pro Display', -apple-system, sans-serif;
-            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            margin-top: 15px;
+            font-family: var(--font-en);
+            letter-spacing: 3px;
+            text-transform: uppercase;
         }
         
-        @keyframes fadeInOut {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
-        
-        /* هدر */
+        /* ===== هدر با افکت Glassmorphism ===== */
         .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px 20px;
             text-align: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            animation: slideDown 1s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
         }
         
         .header h1 {
-            font-family: 'B Nazanin', sans-serif;
-            font-size: 32px;
-            color: #333;
-            margin-bottom: 5px;
+            font-family: var(--font-fa);
+            font-size: 48px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+            animation: titlePulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
         
         .header p {
-            font-family: 'SF Pro Display', -apple-system, sans-serif;
-            font-size: 14px;
-            color: #666;
-            letter-spacing: 1px;
+            font-family: var(--font-en);
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 1;
         }
         
-        /* کانتینر مدل */
+        /* ===== کانتینر مدل با افکت Hover ===== */
         .model-container {
-            max-width: 1200px;
-            margin: 30px auto;
+            max-width: 1400px;
+            margin: 50px auto;
             padding: 0 20px;
+            animation: fadeInUp 1s ease 0.3s both;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .model-wrapper {
+            position: relative;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .model-wrapper:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 80px rgba(102, 126, 234, 0.5);
         }
         
         model-viewer {
             width: 100%;
-            height: 600px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            height: 700px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             --poster-color: transparent;
         }
         
-        /* دکمه AR سفارشی */
+        /* ===== دکمه AR سفارشی با انیمیشن ===== */
         .ar-button {
             position: absolute;
-            bottom: 20px;
-            right: 20px;
+            bottom: 30px;
+            right: 30px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 15px 30px;
+            padding: 18px 40px;
             border-radius: 50px;
-            font-size: 18px;
-            font-family: 'B Nazanin', sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+            font-family: var(--font-fa);
             cursor: pointer;
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
-            gap: 10px;
-        }
-        
-        .ar-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+            gap: 12px;
+            overflow: hidden;
+            position: relative;
         }
         
         .ar-button::before {
-            content: '📱';
-            font-size: 24px;
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
         }
         
-        /* اطلاعات */
+        .ar-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .ar-button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+        }
+        
+        .ar-button span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .ar-button::after {
+            content: '📱';
+            font-size: 28px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* ===== بخش اطلاعات با Glassmorphism ===== */
         .info-section {
-            max-width: 1200px;
-            margin: 30px auto;
+            max-width: 1400px;
+            margin: 60px auto;
             padding: 0 20px;
+            animation: fadeInUp 1s ease 0.6s both;
         }
         
         .info-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 50px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+        
+        .info-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px);
+        }
+        
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, 
+                rgba(102, 126, 234, 0.1) 0%, 
+                rgba(118, 75, 162, 0.1) 50%, 
+                rgba(240, 147, 251, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .info-card:hover::before {
+            opacity: 1;
         }
         
         .info-card h2 {
-            font-family: 'B Nazanin', sans-serif;
-            font-size: 28px;
-            color: #333;
-            margin-bottom: 15px;
+            font-family: var(--font-fa);
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
         }
         
         .info-card p {
-            font-family: 'B Nazanin', sans-serif;
-            font-size: 18px;
-            color: #666;
-            line-height: 1.8;
+            font-family: var(--font-fa);
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 2;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 1;
         }
         
+        /* ===== لیست ویژگی‌ها با انیمیشن ===== */
         .feature-list {
             display: flex;
             justify-content: center;
-            gap: 30px;
-            margin-top: 20px;
+            gap: 50px;
+            margin-top: 40px;
             flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
         }
         
         .feature-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .feature-item:hover {
+            transform: translateY(-10px) scale(1.1);
         }
         
         .feature-icon {
-            font-size: 40px;
+            font-size: 60px;
+            filter: drop-shadow(0 5px 15px rgba(102, 126, 234, 0.5));
+            transition: all 0.3s ease;
+        }
+        
+        .feature-item:hover .feature-icon {
+            transform: rotate(360deg);
+            filter: drop-shadow(0 10px 25px rgba(102, 126, 234, 0.8));
         }
         
         .feature-text {
-            font-family: 'B Nazanin', sans-serif;
-            font-size: 16px;
-            color: #333;
+            font-family: var(--font-fa);
+            font-size: 18px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
         }
         
-        /* فوتر */
+        /* ===== فوتر با نام طراح ===== */
         .footer {
             text-align: center;
-            padding: 30px;
-            color: rgba(255, 255, 255, 0.8);
-            font-family: 'SF Pro Display', -apple-system, sans-serif;
-            font-size: 14px;
+            padding: 50px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeIn 1s ease 1s both;
         }
         
-        /* ریسپانسیو */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .footer .designer-name {
+            font-family: var(--font-en);
+            font-size: 24px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        
+        .footer .powered-by {
+            font-family: var(--font-en);
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 1px;
+        }
+        
+        .footer .copyright {
+            font-family: var(--font-en);
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 20px;
+        }
+        
+        /* ===== ریسپانسیو ===== */
         @media (max-width: 768px) {
             .header h1 {
-                font-size: 24px;
+                font-size: 32px;
+            }
+            
+            .header p {
+                font-size: 12px;
+                letter-spacing: 2px;
             }
             
             model-viewer {
-                height: 400px;
+                height: 500px;
+            }
+            
+            .info-card {
+                padding: 30px 20px;
             }
             
             .info-card h2 {
-                font-size: 22px;
+                font-size: 28px;
             }
             
             .info-card p {
                 font-size: 16px;
+            }
+            
+            .feature-list {
+                gap: 30px;
+            }
+            
+            .feature-icon {
+                font-size: 45px;
+            }
+            
+            .ar-button {
+                padding: 15px 30px;
+                font-size: 16px;
+                bottom: 20px;
+                right: 20px;
+            }
+            
+            .footer .designer-name {
+                font-size: 20px;
+            }
+        }
+        
+        /* ===== انیمیشن اسکرول ===== */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
             }
         }
     </style>
 </head>
 <body>
     
+    <!-- پس‌زمینه متحرک -->
+    <div class="animated-bg"></div>
+    
+    <!-- ذرات متحرک -->
+    <div class="particles" id="particles"></div>
+    
     <!-- صفحه لودینگ -->
     <div class="loading-overlay" id="loadingOverlay">
-        <div class="loader"></div>
-        <div class="loading-text">در حال بارگذاری مدل سه‌بعدی...</div>
-        <div class="loading-subtext">LOADING 3D MODEL</div>
+        <div class="loader-modern"></div>
+        <div class="loading-text">در حال بارگذاری مدل سه‌بعدی</div>
+        <div class="loading-subtext">Loading 3D Experience</div>
     </div>
     
     <!-- هدر -->
     <div class="header">
         <h1>🔥 Fire Box</h1>
-        <p>AUGMENTED REALITY EXPERIENCE</p>
+        <p>Augmented Reality Experience</p>
     </div>
     
     <!-- کانتینر مدل -->
     <div class="model-container">
-        <model-viewer 
-            id="modelViewer"
-            src="fire_box.glb" 
-            alt="مدل سه‌بعدی Fire Box"
-            ar 
-            ar-modes="webxr scene-viewer quick-look"
-            ar-placement="wall"
-            camera-controls 
-            auto-rotate
-            auto-rotate-delay="2000"
-            rotation-per-second="30deg"
-            shadow-intensity="1.5"
-            shadow-softness="0.8"
-            exposure="1.2"
-            tone-mapping="neutral"
-            camera-orbit="45deg 75deg 2.5m"
-            min-camera-orbit="auto auto auto"
-            max-camera-orbit="auto auto auto"
-            interaction-prompt="auto"
-            interaction-prompt-threshold="3000"
-            ar-scale="auto"
-            style="--poster-color: transparent;">
-            
-            <!-- دکمه AR سفارشی -->
-            <button slot="ar-button" class="ar-button">
-                مشاهده در واقعیت افزوده
-            </button>
-            
-            <!-- پیام تعامل -->
-            <div slot="interaction-prompt" style="position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 10px 20px; border-radius: 20px; font-family: 'B Nazanin', sans-serif;">
-                برای چرخاندن، بکشید
-            </div>
-        </model-viewer>
+        <div class="model-wrapper">
+            <model-viewer 
+                id="modelViewer"
+                src="fire_box.glb" 
+                alt="مدل سه‌بعدی Fire Box"
+                ar 
+                ar-modes="webxr scene-viewer quick-look"
+                ar-placement="wall"
+                camera-controls 
+                auto-rotate
+                auto-rotate-delay="2000"
+                rotation-per-second="30deg"
+                shadow-intensity="1.5"
+                shadow-softness="0.8"
+                exposure="1.2"
+                tone-mapping="neutral"
+                camera-orbit="45deg 75deg 2.5m"
+                min-camera-orbit="auto auto auto"
+                max-camera-orbit="auto auto auto"
+                interaction-prompt="auto"
+                interaction-prompt-threshold="3000"
+                ar-scale="auto"
+                style="--poster-color: transparent;">
+                
+                <!-- دکمه AR سفارشی -->
+                <button slot="ar-button" class="ar-button">
+                    <span>مشاهده در واقعیت افزوده</span>
+                </button>
+                
+                <!-- پیام تعامل -->
+                <div slot="interaction-prompt" style="position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 12px 25px; border-radius: 25px; font-family: var(--font-fa); font-size: 16px; backdrop-filter: blur(10px);">
+                    🔄 برای چرخاندن، بکشید
+                </div>
+            </model-viewer>
+        </div>
     </div>
     
     <!-- بخش اطلاعات -->
@@ -344,38 +649,67 @@
                     <div class="feature-icon">🎨</div>
                     <div class="feature-text">کیفیت بالا</div>
                 </div>
+                <div class="feature-item">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-text">سرعت بالا</div>
+                </div>
             </div>
         </div>
     </div>
     
     <!-- فوتر -->
     <div class="footer">
-        <p>Designed with ❤️ by Mahdi-Jahngiri</p>
-        <p style="margin-top: 5px;">Powered by WebAR Technology</p>
+        <div class="designer-name">Designed by Mahdi Jahangiri</div>
+        <div class="powered-by">Powered by WebAR Technology</div>
+        <div class="copyright">© 2026 All Rights Reserved</div>
     </div>
     
     <script>
-        // مخفی کردن صفحه لودینگ بعد از لود شدن مدل
+        // ===== ایجاد ذرات متحرک =====
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+            particlesContainer.appendChild(particle);
+        }
+        
+        // ===== مخفی کردن صفحه لودینگ =====
         const modelViewer = document.getElementById('modelViewer');
         const loadingOverlay = document.getElementById('loadingOverlay');
         
         modelViewer.addEventListener('load', () => {
             setTimeout(() => {
                 loadingOverlay.classList.add('hidden');
-            }, 500);
+            }, 800);
         });
         
-        // اگر مدل قبلاً لود شده
         if (modelViewer.loaded) {
             setTimeout(() => {
                 loadingOverlay.classList.add('hidden');
-            }, 500);
+            }, 800);
         }
         
-        // fallback: بعد از ۵ ثانیه لودینگ را مخفی کن
+        // Fallback: بعد از ۵ ثانیه لودینگ را مخفی کن
         setTimeout(() => {
             loadingOverlay.classList.add('hidden');
         }, 5000);
+        
+        // ===== افکت اسکرول نرم =====
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
     </script>
     
 </body>
